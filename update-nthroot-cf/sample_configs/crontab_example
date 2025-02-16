@@ -1,0 +1,1 @@
+*/5 * * * * CLOUDFLARE_EMAIL=your_email@example.com CLOUDFLARE_API_KEY=your_api_key /usr/bin/python3 /home/brennan/Dev/repos/mytools/update-nthroot-cf/update-nthroot-cf.py >> /home/brennan/Dev/repos/mytools/update-nthroot-cf/update-nthroot-cf.log 2>&1
