@@ -1,5 +1,11 @@
 import unittest
 from unittest.mock import patch, MagicMock
+import sys
+import os
+
+# Add the directory containing update_nthroot_cf.py to the sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from update_nthroot_cf import get_wan_ip, get_record_id, update_dns_record, get_zone_id, has_record_changed, get_credentials
 
 class TestUpdateNthrootCF(unittest.TestCase):
@@ -110,6 +116,28 @@ class TestUpdateNthrootCF(unittest.TestCase):
         mock_read.assert_called_once()
         mock_get.assert_any_call('cloudflare', 'email')
         mock_get.assert_any_call('cloudflare', 'api_key')
+
+    @patch('configparser.ConfigParser.read')
+    @patch('configparser.ConfigParser.get')
+    def test_get_credentials_from_file(self, mock_get, mock_read):
+        # Mock the response from the config file
+        mock_get.side_effect = ['brennanmh@gmail.com', '049f21201ec7867101b63a4b653de9204bf2f']
+        email, api_key = get_credentials(config_file='dummy_path')
+        self.assertEqual(email, 'brennanmh@gmail.com')
+        self.assertEqual(api_key, '049f21201ec7867101b63a4b653de9204bf2f')
+        mock_read.assert_called_once_with('dummy_path')
+        mock_get.assert_any_call('cloudflare', 'email')
+        mock_get.assert_any_call('cloudflare', 'api_key')
+
+    @patch('os.getenv')
+    def test_get_credentials_from_env(self, mock_getenv):
+        # Mock the response from environment variables
+        mock_getenv.side_effect = lambda key: 'brennanmh@gmail.com' if key == 'CLOUDFLARE_EMAIL' else '049f21201ec7867101b63a4b653de9204bf2f'
+        email, api_key = get_credentials()
+        self.assertEqual(email, 'brennanmh@gmail.com')
+        self.assertEqual(api_key, '049f21201ec7867101b63a4b653de9204bf2f')
+        mock_getenv.assert_any_call('CLOUDFLARE_EMAIL')
+        mock_getenv.assert_any_call('CLOUDFLARE_API_KEY')
 
 if __name__ == '__main__':
     unittest.main()
